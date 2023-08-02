@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Enum for HTTP methods
 enum HttpMethod {
@@ -29,17 +29,26 @@ const sendRequest = async <T>(
     headers: Headers = {}
 ): Promise<T> => {
     try {
-        // Make the request using the provided method, URL, data, and headers
-        const response: AxiosResponse<T> = await HttpClient({
+        // Define the request configuration
+        const requestConfig: AxiosRequestConfig = {
             method,
             url,
-            data,
             headers,
-        });
+        };
+
+        // Use 'params' for GET requests and 'data' for other methods
+        if (method === HttpMethod.GET) {
+            requestConfig.params = data;
+        } else {
+            requestConfig.data = data;
+        }
+
+        // Make the request using the provided method, URL, data, and headers
+        const response: AxiosResponse<T> = await HttpClient(requestConfig);
 
         return response.data;
     } catch (error) {
-        console.log(error)
+        console.log(error);
         // Handle errors
         throw error;
     }

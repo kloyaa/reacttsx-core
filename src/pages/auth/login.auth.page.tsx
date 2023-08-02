@@ -20,6 +20,7 @@ import { API_LOGIN } from "../../const/api.const";
 import { ToastContainer, toast } from 'react-toastify';
 import useLocalStorage from "../../hooks/localstorage.hook";
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom'
 
 type Inputs = {
     username: string
@@ -27,6 +28,8 @@ type Inputs = {
 }
 
 export default function AuthLoginPage() {
+    const navigate = useNavigate();
+
     const { register, handleSubmit, reset } = useForm<Inputs>();
     const { setValue: setStoredAuthResponse, removeValue: removeStoredAuthResponse } = useLocalStorage<IApiResponse | null>('authentication_payload', null);
 
@@ -51,6 +54,7 @@ export default function AuthLoginPage() {
             if(response) {
                 setLocalState((prev) => ({ ...prev,  isLoading: false }));
                 setStoredAuthResponse(response);
+                navigate("/a/dashboard", { replace: true });
             }
         } catch (error: any) {
             setLocalState((prev) => ({ ...prev,  isLoading: false }));
