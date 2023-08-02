@@ -1,7 +1,6 @@
 import {
     Box,
     Flex,
-    Avatar,
     HStack,
     IconButton,
     Button,
@@ -19,6 +18,7 @@ import { FaCog } from "react-icons/fa";
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons'
 import useLocalStorage from '../hooks/localstorage.hook';
 import { useNavigate } from 'react-router-dom';
+import { IApiResponse } from '../interface/api.interface';
 
 interface Props {
     children: React.ReactNode
