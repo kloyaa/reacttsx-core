@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
 import { IApiResponse } from '../../interface/api.interface';
+import { UsersTable } from '../../components/tabpanel-content-admin.component';
 
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
@@ -148,70 +149,13 @@ function AdminDashboardPage() {
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"lg"}>
-                        <TableContainer>
-                            <Table variant='simple'>
-                                <Thead>
-                                    <Tr>
-                                        <Th>Name</Th>
-                                        <Th>Gender</Th>
-                                        <Th>Address</Th>
-                                        <Th>Contact No.</Th>
-                                        <Th>Date</Th>
-                                        <Th>Action</Th>
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {localState?.unverifiedUsers.map((value: IUser) => <Tr key={value._id}>
-                                        <Td>{value.profile.lastName}, {value.profile.firstName}</Td>
-                                        <Td>{value.profile.gender}</Td>
-                                        <Td>{value.profile.address}</Td>
-                                        <Td>{value.profile.contactNumber}</Td>
-                                        <Td>{dayjs(value.createdAt).format('MMM D [at] h:mm A')}</Td>
-                                        <Td>
-                                            <Flex gap={"2"}>
-                                                <Button colorScheme={"red"} size={"sm"} variant={"outline"}>Decline</Button>
-                                                <Button colorScheme={"orange"} size={"sm"}>Approve</Button>
-                                            </Flex>
-                                        </Td>
-                                    </Tr>
-                                    )}
-                                </Tbody>
-                            </Table>
-                        </TableContainer>
+                        <UsersTable users={localState?.unverifiedUsers}/>
                     </TabPanel>
                     <TabPanel 
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"md"}>
-                        <TableContainer>
-                            <Table variant='simple'>
-                                <Thead>
-                                    <Tr>
-                                        <Th>Name</Th>
-                                        <Th>Gender</Th>
-                                        <Th>Address</Th>
-                                        <Th>Contact No.</Th>
-                                        <Th>Date</Th>
-                                        <Th>Action</Th>
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {localState?.verifiedUsers.map((value: IUser) => <Tr key={value._id}>
-                                        <Td>{value.profile.lastName}, {value.profile.firstName}</Td>
-                                        <Td>{value.profile.gender}</Td>
-                                        <Td>{value.profile.address}</Td>
-                                        <Td>{value.profile.contactNumber}</Td>
-                                        <Td>{dayjs(value.createdAt).format('MMM D [at] h:mm A')}</Td>
-                                        <Td>
-                                            <Flex gap={"2"}>
-                                                <Button colorScheme={"red"} size={"sm"}>Revoke</Button>
-                                            </Flex>
-                                        </Td>
-                                    </Tr>
-                                    )}
-                                </Tbody>
-                            </Table>
-                        </TableContainer>
+                        <UsersTable users={localState?.verifiedUsers}/>
                     </TabPanel>
                 </TabPanels>
             </Tabs>
