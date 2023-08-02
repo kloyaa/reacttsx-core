@@ -21,6 +21,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import useLocalStorage from "../../hooks/localstorage.hook";
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom'
+import { IApiResponse } from "../../interface/api.interface";
 
 type Inputs = {
     username: string
