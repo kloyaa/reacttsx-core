@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Tab, TabList, TabPanel, TabPanels, Tabs, Box, TableContainer, Table, Thead, Tr, Th, Tbody, Td, Button, Flex,} from '@chakra-ui/react'
+import { Tab, TabList, TabPanel, TabPanels, Tabs, Box } from '@chakra-ui/react'
 import AdminNavbar from '../../components/navbar-admin.component'
 import { useNavigate } from 'react-router-dom';
 import { HttpMethod, sendRequest } from '../../utils/http.util';
