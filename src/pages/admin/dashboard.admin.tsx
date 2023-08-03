@@ -3,7 +3,7 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs, Box, Flex, Select, FormControl
 import AdminNavbar from '../../components/navbar-admin.component'
 import { useNavigate } from 'react-router-dom';
 import { HttpMethod, sendRequest } from '../../utils/http.util';
-import { API_CREATE_DAILY_RESULT, API_DELETE_DAILY_RESULT, API_GET_ACTIVITIES, API_GET_ALL_BETS, API_GET_DAILY_RESULTS, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
+import { API_CREATE_DAILY_RESULT, API_DELETE_DAILY_RESULT, API_GET_ACTIVITIES, API_GET_ALL_BETS, API_GET_DAILY_RESULTS, API_GET_DAILY_TOTAL, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
 import { IActivity, IUser } from '../../interface/user.interface';
 import useLocalStorage from '../../hooks/localstorage.hook';
 import MoonLoader from "react-spinners/MoonLoader";
@@ -31,6 +31,10 @@ interface ILocalState {
     dailyResultsIsFetching: boolean;
     dailyResultIsCreating: boolean;
     selectedId: string;
+    dailyTotal: {
+        total: number;
+        count: number;
+    }
     selectedDrawTime: {
         time?: string;
         game?: string;
@@ -59,7 +63,11 @@ function AdminDashboardPage() {
         selectedDrawTime: {},
         selectedId: "",
         dailyResultsIsFetching: true,
-        dailyResultIsCreating: false
+        dailyResultIsCreating: false,
+        dailyTotal: {
+            count: 0,
+            total: 0
+        }
     });
 
     const { value: getStoredAuthResponse, removeValue: removeStoredAuthResponse } = useLocalStorage<IApiResponse | null>('authentication_payload', null);
@@ -163,12 +171,28 @@ function AdminDashboardPage() {
             {},
             { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
         );
+        await onGetDailyTotal();
         setLocalState((prev) => ({
             ...prev,
             dailyResultsIsFetching: false,
             dailyResults: response as any
         }))
     }
+
+    const onGetDailyTotal = async () => {
+        const date = new Date();
+        const response = await sendRequest<IApiResponse>(
+            HttpMethod.GET,
+            API_GET_DAILY_TOTAL, // Replace with your actual authentication API endpoint
+            { schedule: date.toISOString().substring(0, 10)},
+            { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
+        );
+        setLocalState((prev) => ({
+            ...prev,
+            dailyTotal: response as any
+        }))
+    }
+
 
     const onDeleteDailyResult = async (id: string) => {
         try {
@@ -256,6 +280,7 @@ function AdminDashboardPage() {
     }
 
     useEffect(() => {
+        onGetDailyTotal();
         onGetDailyResults();
         verifyToken();
     }, []);
@@ -332,7 +357,9 @@ function AdminDashboardPage() {
                                 </Tooltip>
                             </Flex>
                         </FormControl>
-                        <AdminDailyTotalCard />
+                        <AdminDailyTotalCard 
+                            count={localState.dailyTotal.count} 
+                            total={localState.dailyTotal.total}/>
                         <Box
                             mt={"5"}
                             borderRadius={"md"}

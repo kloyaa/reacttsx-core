@@ -4,11 +4,13 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import AuthLoginPage from './pages/auth/login.auth.page';
 import AdminDashboardPage from './pages/admin/dashboard.admin';
+import Error from './pages/notfound.page';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <AuthLoginPage />,
+    errorElement: <Error />
   },
   {
     path: "/a/dashboard",
