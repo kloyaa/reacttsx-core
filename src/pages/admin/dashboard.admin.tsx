@@ -191,6 +191,8 @@ function AdminDashboardPage() {
             ...prev,
             dailyTotal: response as any
         }))
+
+        console.log({ schedule: date.toISOString().substring(0, 10) })
     }
 
 

@@ -42,8 +42,6 @@ export default function AuthLoginPage() {
 
     const onLogin: SubmitHandler<Inputs> = async (data: Inputs) => {
         const { username, password } = data;
-        console.log(username, password)
-
         // Send a POST request to the authentication API endpoint with dynamic headers
         try {
             setLocalState((prev) => ({ ...prev,  isLoading: true }));
