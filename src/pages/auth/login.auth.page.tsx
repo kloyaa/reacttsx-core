@@ -13,11 +13,11 @@ import {
     useColorModeValue,
     InputGroup,
     InputRightElement,
+    useToast
 } from '@chakra-ui/react'
 import { useForm, SubmitHandler } from "react-hook-form"
 import { HttpMethod, sendRequest } from "../../utils/http.util";
 import { API_LOGIN } from "../../const/api.const";
-import { ToastContainer, toast } from 'react-toastify';
 import useLocalStorage from "../../hooks/localstorage.hook";
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom'
@@ -30,6 +30,7 @@ type Inputs = {
 
 export default function AuthLoginPage() {
     const navigate = useNavigate();
+    const toast = useToast();
 
     const { register, handleSubmit, reset } = useForm<Inputs>();
     const { setValue: setStoredAuthResponse, removeValue: removeStoredAuthResponse } = useLocalStorage<IApiResponse | null>('authentication_payload', null);
@@ -59,16 +60,11 @@ export default function AuthLoginPage() {
             }
         } catch (error: any) {
             setLocalState((prev) => ({ ...prev,  isLoading: false }));
-            toast.error(error.response.data.message|| "Something went wrong. Please try again later.", {
-                position: "bottom-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "colored",
-            });
+            toast({
+                status: "error",
+                colorScheme: "red",
+                title: error.response.data.message|| "Something went wrong. Please try again later."
+            })
 
             // clear
             removeStoredAuthResponse();
@@ -150,6 +146,5 @@ export default function AuthLoginPage() {
             </Box>
             </Stack>
         </Flex>
-        <ToastContainer />
     </>
 }

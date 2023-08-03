@@ -7,6 +7,7 @@ export interface IUserProfile {
   contactNumber: string;
   gender: string;
   verified: boolean;
+  refferedBy: string;
 }
 
 export interface IUserRole {
@@ -24,4 +25,13 @@ export interface IUser {
   profile: IUserProfile;
   role: IUserRole[];
   createdAt: Date;
+}
+
+export interface IActivity {
+  _id: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+  user: IUser,
+  profile: IUserProfile;
 }

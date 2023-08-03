@@ -3,15 +3,15 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs, Box } from '@chakra-ui/react'
 import AdminNavbar from '../../components/navbar-admin.component'
 import { useNavigate } from 'react-router-dom';
 import { HttpMethod, sendRequest } from '../../utils/http.util';
-import { API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
-import { IUser } from '../../interface/user.interface';
+import { API_GET_ACTIVITIES, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
+import { IActivity, IUser } from '../../interface/user.interface';
 import useLocalStorage from '../../hooks/localstorage.hook';
 
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
 import { IApiResponse } from '../../interface/api.interface';
-import { UsersTable } from '../../components/tabpanel-content-admin.component';
+import { ActivityTable, UsersTable } from '../../components/tabpanel-content-admin.component';
 
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
@@ -20,6 +20,7 @@ interface ILocalState {
     isVerifyingToken: boolean;
     unverifiedUsers: IUser[];
     verifiedUsers: IUser[];
+    activities: IActivity[];
 }
 
 function AdminDashboardPage() {
@@ -27,7 +28,8 @@ function AdminDashboardPage() {
     const [localState, setLocalState] = useState<ILocalState>({
         isVerifyingToken: true,
         verifiedUsers: [],
-        unverifiedUsers: []
+        unverifiedUsers: [],
+        activities: []
     });
 
     const { value: getStoredAuthResponse, removeValue: removeStoredAuthResponse } = useLocalStorage<IApiResponse | null>('authentication_payload', null);
@@ -84,10 +86,20 @@ function AdminDashboardPage() {
                 unverifiedUsers: response as any
             }))
         }
-
-        console.log(response)
     }
 
+    const onGetActivities = async () => {
+        const response = await sendRequest<IApiResponse>(
+            HttpMethod.GET,
+            API_GET_ACTIVITIES, // Replace with your actual authentication API endpoint
+            {},
+            { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
+        );
+        setLocalState((prev) => ({
+            ...prev,
+            activities: response as any
+        }))
+    }
 
     useEffect(() => {
         verifyToken();
@@ -122,6 +134,9 @@ function AdminDashboardPage() {
                         <Tab 
                             fontSize={"sm"} 
                             onClick={() => onGetUsers({  verified: true })}>Users</Tab>
+                        <Tab 
+                            fontSize={"sm"} 
+                            onClick={() => onGetActivities()}>Activities</Tab>
                     </Box>
                 </TabList>
                 <TabPanels>
@@ -149,13 +164,32 @@ function AdminDashboardPage() {
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"lg"}>
-                        <UsersTable users={localState?.unverifiedUsers}/>
+                        <UsersTable 
+                            users={localState?.unverifiedUsers}  
+                            options={{
+                                table: { verified: false },
+                                headers: {
+                                    authorizationToken: getStoredAuthResponse?.data  as string
+                                }}}/>
                     </TabPanel>
                     <TabPanel 
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"md"}>
-                        <UsersTable users={localState?.verifiedUsers}/>
+                        <UsersTable 
+                            users={localState?.verifiedUsers} 
+                            options={{
+                                table: { verified: true },
+                                headers: {
+                                    authorizationToken: getStoredAuthResponse?.data as string
+                                }
+                            }}/>
+                    </TabPanel>
+                    <TabPanel 
+                        bg={"white"}
+                        borderRadius={"md"}
+                        shadow={"md"}>
+                        <ActivityTable activities={localState?.activities}/>
                     </TabPanel>
                 </TabPanels>
             </Tabs>
