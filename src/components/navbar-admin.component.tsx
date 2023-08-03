@@ -24,7 +24,7 @@ interface Props {
     children: React.ReactNode
 }
 
-const Links = ['Generate Statements', 'Account Management', 'Analytics', "System"]
+const Links = ['Generate Statements', 'Account Management', "System"]
 
 const NavLink = (props: Props) => {
     const { children } = props
@@ -36,8 +36,7 @@ const NavLink = (props: Props) => {
         rounded={'md'}
         fontSize={"sm"}
         cursor={"pointer"}
-        color={"dimgray"}
-        >
+        color={"gray.300"}>
         <Tooltip hasArrow label="Coming soon!" aria-label='Coming soon!'>
             {children}
         </Tooltip>
@@ -58,7 +57,7 @@ export default function AdminNavbar() {
     return (
     <>
         <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
-        <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
+        <Flex h={12} alignItems={'center'} justifyContent={'space-between'}>
             <IconButton
             size={'md'}
             icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}

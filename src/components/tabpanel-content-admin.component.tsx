@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { IApiResponse } from '../interface/api.interface';
 import { HttpMethod, sendRequest } from '../utils/http.util';
 import { API_VERIFY_PROFILE } from '../const/api.const';
+import { IBet } from '../interface/bet.interface';
+import { currency } from '../utils/converter.util';
 
 interface ILocalState {
     users: IUser[];
@@ -27,6 +29,10 @@ interface IUsersTable {
 
 interface IActivityTable {
     activities: IActivity[]; 
+}
+
+interface IBetOverviewTable {
+    bets: IBet[]; 
 }
 
 // Remove the useState from the renderUserRow function
@@ -74,6 +80,19 @@ const renderActivityRow = (activity: IActivity) => {
     </Tr>
 };
 
+const renderBetRow = (bet: IBet) => {
+    return <Tr key={bet._id}>
+            <Td  fontWeight={"black"}>{`${bet.reference}`}</Td>
+            <Td>{`${bet.type}`}</Td>
+            <Td color={"orange.500"} fontWeight={"black"}>{`${bet.number}`}</Td>
+            <Td>{`${bet.time}`}</Td>
+            <Td>{`${bet.schedule}`}</Td>
+            <Td>{currency.format(bet.amount)}</Td>
+            <Td textTransform={"uppercase"} fontWeight={"black"}>{bet.rambled ? "R" : "T"}</Td>
+            <Td>
+        </Td>
+    </Tr>
+};
 
 export const UsersTable = ({ users, options }: IUsersTable) => {
     const toast = useToast();
@@ -168,7 +187,6 @@ export const ActivityTable = ({ activities }: IActivityTable) => {
     const [localState, setLocalState] = useState<IActivityTable>({
         activities: []
     });
-
     
     useEffect(() => {
         // Update localState whenever the users prop changes
@@ -177,7 +195,6 @@ export const ActivityTable = ({ activities }: IActivityTable) => {
             activities
         }));
     }, [activities]);
-
 
     return <>
         <TableContainer>
@@ -204,3 +221,43 @@ export const ActivityTable = ({ activities }: IActivityTable) => {
         </TableContainer>
     </>
 };
+
+export const BetOverviewTable = ({ bets }: IBetOverviewTable) => {
+    const [localState, setLocalState] = useState<IBetOverviewTable>({
+        bets: []
+    });
+    
+    useEffect(() => {
+        // Update localState whenever the users prop changes
+        setLocalState((prev) => ({
+            ...prev,
+            bets
+        }));
+    }, [bets]);
+
+    return  <TableContainer>
+    <Table variant="simple" size={"sm"} h={"10px"}>
+        <Thead>
+            <Tr>
+                <Th>Ref</Th>
+                <Th>Game</Th>
+                <Th>Number</Th>
+                <Th>Time</Th>
+                <Th>Schedule</Th>
+                <Th>Amount</Th>
+                <Th>Type</Th>
+            </Tr>
+        </Thead>
+        <Tbody>
+            { localState.bets?.length === 0
+                ? <Tr>
+                        <Td colSpan={7} textAlign="center" p={"20"} color={"gray.500"} border={"none"}>
+                            <Text>Seems like we don't have bets yet.</Text>
+                        </Td>
+                    </Tr>
+                : localState.bets.map((bet: IBet) => renderBetRow(bet))}
+            </Tbody>
+    </Table>
+</TableContainer>
+}
+
