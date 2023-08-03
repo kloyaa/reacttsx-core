@@ -42,10 +42,6 @@ interface IGetTodaysBet {
     game: "STL" | "3D";
 }
 
-interface IFormInput {
-    drawTime: string
-}
-
 interface IFormCreateDailyResult {
     schedule: string;
     result: string;
