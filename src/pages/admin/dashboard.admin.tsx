@@ -216,10 +216,14 @@ function AdminDashboardPage() {
     const onGetDailyTotal = async () => {
         const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
         const dateToday = new Date(today); // Convert the formatted string back to a Date object
+        const year = dateToday.getFullYear();
+        const month = String(dateToday.getMonth() + 1).padStart(2, '0');
+        const day = String(dateToday.getDate()).padStart(2, '0');
+
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
             API_GET_DAILY_TOTAL, // Replace with your actual authentication API endpoint
-            { schedule: dateToday.toISOString().substring(0, 10)},
+            { "schedule": `${year}-${month}-${day}` },
             { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
         );
         setLocalState((prev) => ({
@@ -227,7 +231,7 @@ function AdminDashboardPage() {
             dailyTotal: response as any
         }))
 
-        console.log({ title: "@onGetDailyTotal", schedule: dateToday.toISOString().substring(0, 10) })
+        console.log({ title: "@onGetDailyTotal", schedule: `${year}-${month}-${day}` })
     }
 
     const onDeleteDailyResult = async (id: string) => {
