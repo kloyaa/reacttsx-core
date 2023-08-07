@@ -199,10 +199,16 @@ function AdminDashboardPage() {
     }
 
     const onGetDailyResults = async () => {
+        const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+        const dateToday = new Date(today); // Convert the formatted string back to a Date object
+        const year = dateToday.getFullYear();
+        const month = String(dateToday.getMonth() + 1).padStart(2, '0');
+        const day = String(dateToday.getDate()).padStart(2, '0');
+        
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
             API_GET_DAILY_RESULTS, // Replace with your actual authentication API endpoint
-            {},
+            { "schedule": `${year}-${month}-${day}` },
             { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
         );
         await onGetDailyTotal();
