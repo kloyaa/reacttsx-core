@@ -195,7 +195,7 @@ function AdminDashboardPage() {
             dailyTransactions: response as any
         }))
 
-        console.log(response);
+        console.log({ title: "@onGetTodaysTransaction", schedule: `${year}-${month}-${day}` })
     }
 
     const onGetDailyResults = async () => {
@@ -227,7 +227,7 @@ function AdminDashboardPage() {
             dailyTotal: response as any
         }))
 
-        console.log({ schedule: dateToday.toISOString().substring(0, 10) })
+        console.log({ title: "@onGetDailyTotal", schedule: dateToday.toISOString().substring(0, 10) })
     }
 
     const onDeleteDailyResult = async (id: string) => {
@@ -357,6 +357,8 @@ function AdminDashboardPage() {
             },
             dailyTransactions: response as any
         }))
+
+        console.log({ title: "@handleSelectDrawTime", schedule: `${year}-${month}-${day}` })
     }
 
     useEffect(() => {
