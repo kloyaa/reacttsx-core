@@ -152,7 +152,8 @@ function AdminDashboardPage() {
     }
 
     const onGetTodaysTransaction = async () => {
-        const dateToday = new Date();
+        const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+        const dateToday = new Date(today); // Convert the formatted string back to a Date object
         const year = dateToday.getFullYear();
         const month = String(dateToday.getMonth() + 1).padStart(2, '0');
         const day = String(dateToday.getDate()).padStart(2, '0');
@@ -309,7 +310,8 @@ function AdminDashboardPage() {
             return await onGetTodaysTransaction();
         }
         const [game, time] = data.target.value.split(", ");
-        const dateToday = new Date();
+        const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+        const dateToday = new Date(today); // Convert the formatted string back to a Date object
         const year = dateToday.getFullYear();
         const month = String(dateToday.getMonth() + 1).padStart(2, '0');
         const day = String(dateToday.getDate()).padStart(2, '0');
