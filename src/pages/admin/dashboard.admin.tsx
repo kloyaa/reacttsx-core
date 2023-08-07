@@ -47,11 +47,6 @@ interface ILocalState {
     }
 }
 
-interface IGetTodaysBet {
-    time: "10:30 AM" | "3:00 PM" | "8:00 PM" | "2:00 PM" | "5:00 PM" | "9:00 PM" ;
-    game: "STL" | "3D";
-}
-
 interface IFormCreateDailyResult {
     schedule: string;
     result: string;
@@ -165,7 +160,7 @@ function AdminDashboardPage() {
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
             API_GET_ALL_TRANSACTIONS, // Replace with your actual authentication API endpoint
-            { "schedule": `${year}-${month}-${'07'}` },
+            { "schedule": `${year}-${month}-${day}` },
             { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
         );
         
@@ -317,12 +312,13 @@ function AdminDashboardPage() {
         const dateToday = new Date();
         const year = dateToday.getFullYear();
         const month = String(dateToday.getMonth() + 1).padStart(2, '0');
+        const day = String(dateToday.getDate()).padStart(2, '0');
 
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
             API_GET_ALL_TRANSACTIONS, // Replace with your actual authentication API endpoint
             { 
-                "schedule": `${year}-${month}-${'07'}`,
+                "schedule": `${year}-${month}-${day}`,
                 "game": game,
                 "time": time
             },
