@@ -204,7 +204,7 @@ function AdminDashboardPage() {
         const year = dateToday.getFullYear();
         const month = String(dateToday.getMonth() + 1).padStart(2, '0');
         const day = String(dateToday.getDate()).padStart(2, '0');
-        
+
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
             API_GET_DAILY_RESULTS, // Replace with your actual authentication API endpoint
@@ -216,7 +216,9 @@ function AdminDashboardPage() {
             ...prev,
             dailyResultsIsFetching: false,
             dailyResults: response as any
-        }))
+        }));
+
+        console.log({ title: "@onGetDailyResults", schedule: `${year}-${month}-${day}` })
     }
 
     const onGetDailyTotal = async () => {
