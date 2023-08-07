@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Tab, TabList, TabPanel, TabPanels, Tabs, Box, Flex, Select, FormControl, FormLabel, Wrap, WrapItem, Center, Text, Input, Button, Portal, PopoverContent, Popover, PopoverTrigger, PopoverArrow, Skeleton, useToast, Tooltip, Table, Tr, TableContainer, TableCaption, Thead, Th, Tbody, Td, Badge } from '@chakra-ui/react'
+import { Tab, TabList, TabPanel, TabPanels, Tabs, Box, Flex, Select, FormControl, FormLabel, Wrap, WrapItem, Center, Text, Input, Button, Portal, PopoverContent, Popover, PopoverTrigger, PopoverArrow, Skeleton, useToast, Tooltip, Table, Tr, TableContainer, Thead, Th, Tbody, Badge } from '@chakra-ui/react'
 import AdminNavbar from '../../components/navbar-admin.component'
 import { useNavigate } from 'react-router-dom';
 import { HttpMethod, sendRequest } from '../../utils/http.util';
-import { API_CREATE_DAILY_RESULT, API_DELETE_DAILY_RESULT, API_GET_ACTIVITIES, API_GET_ALL_BETS, API_GET_ALL_TRANSACTIONS, API_GET_DAILY_RESULTS, API_GET_DAILY_TOTAL, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
+import { API_CREATE_DAILY_RESULT, API_DELETE_DAILY_RESULT, API_GET_ACTIVITIES, API_GET_ALL_TRANSACTIONS, API_GET_DAILY_RESULTS, API_GET_DAILY_TOTAL, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
 import { IActivity, IUser } from '../../interface/user.interface';
 import useLocalStorage from '../../hooks/localstorage.hook';
 import MoonLoader from "react-spinners/MoonLoader";
-
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'; // Import the relativeTime plugin to display relative time
 import 'dayjs/locale/en'; // Import the English locale to display month names in English
 import { IApiResponse } from '../../interface/api.interface';
-import { ActivityTable, BetOverviewTable, UsersTable } from '../../components/tabpanel-content-admin.component';
+import { ActivityTable, UsersTable } from '../../components/tabpanel-content-admin.component';
 import { IBet, IDailyResult } from '../../interface/bet.interface';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { FaPrint } from "react-icons/fa"
@@ -155,30 +154,6 @@ function AdminDashboardPage() {
             ...prev,
             activities: response as any
         }))
-    }
-
-    const onGetTodaysBet = async (data: IGetTodaysBet) => {
-        const dateToday = new Date();
-        const year = dateToday.getFullYear();
-        const month = String(dateToday.getMonth() + 1).padStart(2, '0');
-        const day = String(dateToday.getDate()).padStart(2, '0');
-
-        const response = await sendRequest<IApiResponse>(
-            HttpMethod.GET,
-            API_GET_ALL_BETS, // Replace with your actual authentication API endpoint
-            {
-                "time": data.time,
-                "type": data.game,
-                "schedule": `${year}-${month}-${day}`
-            },
-            { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
-        );
-        setLocalState((prev) => ({
-            ...prev,
-            dailyBets: response as any
-        }))
-
-        console.log(response)
     }
 
     const onGetTodaysTransaction = async () => {
@@ -342,7 +317,6 @@ function AdminDashboardPage() {
         const dateToday = new Date();
         const year = dateToday.getFullYear();
         const month = String(dateToday.getMonth() + 1).padStart(2, '0');
-        const day = String(dateToday.getDate()).padStart(2, '0');
 
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
@@ -388,7 +362,6 @@ function AdminDashboardPage() {
 
     useEffect(() => {
         onGetTodaysTransaction();
-        // onGetDailyTotal();
         onGetDailyResults();
         verifyToken();
     }, []);
