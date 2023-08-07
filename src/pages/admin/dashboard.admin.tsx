@@ -279,19 +279,24 @@ function AdminDashboardPage() {
     const onCreateDailyResult = async (data: IFormCreateDailyResult) => {
         try {
             const [game, time] = data.schedule.split(",");
-            const date = new Date();
 
             setLocalState((prev) => ({
                 ...prev,
                 dailyResultIsCreating: true,
             }))
 
+            const today = new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" });
+            const dateToday = new Date(today); // Convert the formatted string back to a Date object
+            const year = dateToday.getFullYear();
+            const month = String(dateToday.getMonth() + 1).padStart(2, '0');
+            const day = String(dateToday.getDate()).padStart(2, '0');
+    
             await sendRequest<IApiResponse>(
                 HttpMethod.POST,
                 API_CREATE_DAILY_RESULT, // Replace with your actual authentication API endpoint
                 {
                     "type": game.trim(),
-                    "schedule": date.toISOString().substring(0, 10), 
+                    "schedule": `${year}-${month}-${day}`, 
                     "time": time.trim(),//2:00 PM, 5:00 PM, 9:00 PM
                     "number": data.result
                 },
