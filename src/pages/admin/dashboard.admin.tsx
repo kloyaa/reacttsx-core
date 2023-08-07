@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Tab, TabList, TabPanel, TabPanels, Tabs, Box, Flex, Select, FormControl, FormLabel, Wrap, WrapItem, Center, Text, Input, Button, Portal, PopoverContent, Popover, PopoverTrigger, PopoverArrow, Skeleton, useToast, Tooltip } from '@chakra-ui/react'
+import { Tab, TabList, TabPanel, TabPanels, Tabs, Box, Flex, Select, FormControl, FormLabel, Wrap, WrapItem, Center, Text, Input, Button, Portal, PopoverContent, Popover, PopoverTrigger, PopoverArrow, Skeleton, useToast, Tooltip, Table, Tr, TableContainer, TableCaption, Thead, Th, Tbody, Td, Badge } from '@chakra-ui/react'
 import AdminNavbar from '../../components/navbar-admin.component'
 import { useNavigate } from 'react-router-dom';
 import { HttpMethod, sendRequest } from '../../utils/http.util';
-import { API_CREATE_DAILY_RESULT, API_DELETE_DAILY_RESULT, API_GET_ACTIVITIES, API_GET_ALL_BETS, API_GET_DAILY_RESULTS, API_GET_DAILY_TOTAL, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
+import { API_CREATE_DAILY_RESULT, API_DELETE_DAILY_RESULT, API_GET_ACTIVITIES, API_GET_ALL_BETS, API_GET_ALL_TRANSACTIONS, API_GET_DAILY_RESULTS, API_GET_DAILY_TOTAL, API_GET_PROFILES, API_VERIFY_TOKEN } from '../../const/api.const';
 import { IActivity, IUser } from '../../interface/user.interface';
 import useLocalStorage from '../../hooks/localstorage.hook';
 import MoonLoader from "react-spinners/MoonLoader";
@@ -17,6 +17,8 @@ import { IBet, IDailyResult } from '../../interface/bet.interface';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { FaPrint } from "react-icons/fa"
 import AdminDailyTotalCard from '../../components/daily-total-admin.component';
+import { ITransaction } from '../../interface/transaction.interface';
+import { currency } from '../../utils/converter.util';
 
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
@@ -26,11 +28,16 @@ interface ILocalState {
     unverifiedUsers: IUser[];
     verifiedUsers: IUser[];
     activities: IActivity[];
+    dailyTransactions: ITransaction[];
     dailyBets: IBet[];
     dailyResults: IDailyResult[];
     dailyResultsIsFetching: boolean;
     dailyResultIsCreating: boolean;
     selectedId: string;
+    bet: {
+        stl: number;
+        swertresCount: number;
+    },
     dailyTotal: {
         total: number;
         count: number;
@@ -49,6 +56,7 @@ interface IGetTodaysBet {
 interface IFormCreateDailyResult {
     schedule: string;
     result: string;
+    searchTerm: string;
 }
 
 function AdminDashboardPage() {
@@ -58,21 +66,30 @@ function AdminDashboardPage() {
         verifiedUsers: [],
         unverifiedUsers: [],
         activities: [],
+        dailyTransactions: [],
         dailyBets: [],
         dailyResults: [],
         selectedDrawTime: {},
         selectedId: "",
         dailyResultsIsFetching: true,
         dailyResultIsCreating: false,
+        bet: {
+            stl: 0,
+            swertresCount: 0
+        },
         dailyTotal: {
             count: 0,
             total: 0
         }
     });
+    const [searchResults, setSearchResults] = useState<IUser[]>([]);
 
     const { value: getStoredAuthResponse, removeValue: removeStoredAuthResponse } = useLocalStorage<IApiResponse | null>('authentication_payload', null);
-    const { register, handleSubmit } = useForm<IFormCreateDailyResult>()
+    const { register, handleSubmit, watch } = useForm<IFormCreateDailyResult>()
+    const searchTerm = watch('searchTerm', '');
+
     const toast = useToast();
+    
       // Function to verify the token before rendering the page
     const verifyToken = async () => {
         try {
@@ -164,6 +181,52 @@ function AdminDashboardPage() {
         console.log(response)
     }
 
+    const onGetTodaysTransaction = async () => {
+        const dateToday = new Date();
+        const year = dateToday.getFullYear();
+        const month = String(dateToday.getMonth() + 1).padStart(2, '0');
+        const day = String(dateToday.getDate()).padStart(2, '0');
+
+        const response = await sendRequest<IApiResponse>(
+            HttpMethod.GET,
+            API_GET_ALL_TRANSACTIONS, // Replace with your actual authentication API endpoint
+            { "schedule": `${year}-${month}-${'07'}` },
+            { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
+        );
+        
+        const result: any[] = response as unknown as any;
+
+        let total = 0;
+        let stlCount = 0;
+        let swertresCount = 0;
+        for (const transaction of result) {
+            for (const content of transaction.content) {
+                if(content.type === "3D") {
+                    swertresCount += 1;
+                }
+                if(content.type === "STL") {
+                    stlCount += 1;
+                }
+                total += content.amount;
+            }
+        }
+
+        setLocalState((prev) => ({
+            ...prev,
+            bet: {
+                stl: stlCount,
+                swertresCount: swertresCount
+            },
+            dailyTotal:  {
+                total,
+                count: 0
+            },
+            dailyTransactions: response as any
+        }))
+
+        console.log(response);
+    }
+
     const onGetDailyResults = async () => {
         const response = await sendRequest<IApiResponse>(
             HttpMethod.GET,
@@ -194,7 +257,6 @@ function AdminDashboardPage() {
 
         console.log({ schedule: date.toISOString().substring(0, 10) })
     }
-
 
     const onDeleteDailyResult = async (id: string) => {
         try {
@@ -273,20 +335,77 @@ function AdminDashboardPage() {
     }
 
     const handleSelectDrawTime: SubmitHandler<any> = async (data) => {
+        if(data.target.value === "") {
+            return await onGetTodaysTransaction();
+        }
         const [game, time] = data.target.value.split(", ");
+        const dateToday = new Date();
+        const year = dateToday.getFullYear();
+        const month = String(dateToday.getMonth() + 1).padStart(2, '0');
+        const day = String(dateToday.getDate()).padStart(2, '0');
+
+        const response = await sendRequest<IApiResponse>(
+            HttpMethod.GET,
+            API_GET_ALL_TRANSACTIONS, // Replace with your actual authentication API endpoint
+            { 
+                "schedule": `${year}-${month}-${'07'}`,
+                "game": game,
+                "time": time
+            },
+            { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` }, // Pass the dynamic headers here
+        );
+
+        const result: any[] = response as unknown as any;
+
+        let total = 0;
+        let stlCount = 0;
+        let swertresCount = 0;
+        for (const transaction of result) {
+            for (const content of transaction.content) {
+                if(content.type === "3D") {
+                    swertresCount += 1;
+                }
+                if(content.type === "STL") {
+                    stlCount += 1;
+                }
+                total += content.amount;
+            }
+        }
+
         setLocalState((prev) => ({
             ...prev,
-            selectedDrawTime: { game, time }
+            bet: {
+                stl: stlCount,
+                swertresCount: swertresCount
+            },
+            dailyTotal:  {
+                total,
+                count: 0
+            },
+            dailyTransactions: response as any
         }))
-        await onGetTodaysBet({ time, game });
     }
 
     useEffect(() => {
-        onGetDailyTotal();
+        onGetTodaysTransaction();
+        // onGetDailyTotal();
         onGetDailyResults();
         verifyToken();
     }, []);
     
+    useEffect(() => {
+        const filteredUsers = localState.unverifiedUsers.filter(
+            (user) =>
+                user.profile.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.profile.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.profile.refferedBy.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    
+        setSearchResults(filteredUsers);
+
+        console.log("re-rendered")
+    }, [watch("searchTerm")]);
+
     if (localState.isVerifyingToken) {
         return <Flex
             minH={'100vh'}
@@ -337,7 +456,7 @@ function AdminDashboardPage() {
                             <Flex gap={"2"}>
                             <Select 
                                     bg={"white"}
-                                    placeholder="Select a schedule" 
+                                    placeholder="Select all draw" 
                                     onChange={(v) => handleSelectDrawTime(v)}>
                                     <optgroup label="3D">
                                         <option value="3D, 2:00 PM">2:00 PM</option>
@@ -360,7 +479,8 @@ function AdminDashboardPage() {
                             </Flex>
                         </FormControl>
                         <AdminDailyTotalCard 
-                            count={localState.dailyTotal.count} 
+                            swertresCount={localState.bet.swertresCount}
+                            stlCount={localState.bet.stl}
                             total={localState.dailyTotal.total}/>
                         <Box
                             mt={"5"}
@@ -370,7 +490,46 @@ function AdminDashboardPage() {
                             p={"5"}>
                             <Flex>
                                 <Box w={"70%"} p={"5"} maxH="500px" overflow="auto">
-                                    <BetOverviewTable bets={localState.dailyBets}/>
+                                    {/* <BetOverviewTable bets={localState.dailyBets}/> */}
+                                    <TableContainer>
+                                        <Table variant='striped' size={"sm"}>
+                                            <Thead >
+                                                <Tr>
+                                                    <Th>Teller</Th>
+                                                    <Th>Number</Th>
+                                                    <Th>Game</Th>
+                                                    <Th>Draw Time</Th>
+                                                    <Th>Type</Th>
+                                                    <Th>Amount</Th>
+                                                    <Th>Transaction Time</Th>
+                                                </Tr>
+                                            </Thead>
+                                            <Tbody>
+                                                {localState.dailyTransactions.map((v) => {
+                                                        return v.content.map((content, index) => {
+                                                            const combinationType = content.rambled ? "R" : "T";
+                                                            return <Tr key={v._id + `${index}`}>
+                                                                <td>
+                                                                    <Text textTransform={"capitalize"}>{v.profile.firstName}</Text>
+                                                                </td>
+                                                                <td>
+                                                                    <Text fontWeight={"black"}>{content.number}</Text>
+                                                                </td>
+                                                                <td>{content.type}</td>
+                                                                <td>{content.time}</td>
+                                                                <td>
+                                                                    {combinationType === "T" 
+                                                                        ? <Badge colorScheme={"blackAlpha"} w={"90px"} textAlign={"center"}>TARGET</Badge> 
+                                                                        : <Badge colorScheme={"orange"} w={"90px"} textAlign={"center"}>RAMBLED</Badge>}
+                                                                </td>
+                                                                <td >{currency.format(content.amount)}</td>
+                                                                <td>{dayjs(v.createdAt).format("h:mm A")}</td>
+                                                            </Tr>
+                                                        })
+                                                })}
+                                            </Tbody>
+                                        </Table>
+                                    </TableContainer>
                                 </Box>
                                 <Box w={"30%"} p={"5"}>
                                     <Wrap justify={"start"}>
@@ -490,13 +649,23 @@ function AdminDashboardPage() {
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"lg"}>
-                        <UsersTable 
-                            users={localState?.unverifiedUsers}  
-                            options={{
-                                table: { verified: false },
-                                headers: {
-                                    authorizationToken: getStoredAuthResponse?.data  as string
-                                }}}/>
+
+                            <Box p={"5"} maxH="80vh" overflow="auto">
+                            <Box my={"5"}>
+                                <Input
+                                    {...register('searchTerm')}
+                                        type="text"
+                                        placeholder="Search by referrer, first or last name"/>
+                            </Box>
+
+                            <UsersTable 
+                                users={searchResults.length != 0? searchResults :  localState?.unverifiedUsers}  
+                                options={{
+                                    table: { verified: false },
+                                    headers: {
+                                        authorizationToken: getStoredAuthResponse?.data  as string
+                                    }}}/>
+                            </Box>
                     </TabPanel>
                     
                     {/* Verified users */}
@@ -504,14 +673,16 @@ function AdminDashboardPage() {
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"md"}>
-                        <UsersTable 
-                            users={localState?.verifiedUsers} 
-                            options={{
-                                table: { verified: true },
-                                headers: {
-                                    authorizationToken: getStoredAuthResponse?.data as string
-                                }
-                            }}/>
+                            <Box p={"5"} maxH="80vh" overflow="auto">
+                                <UsersTable 
+                                    users={localState?.verifiedUsers} 
+                                    options={{
+                                        table: { verified: true },
+                                        headers: {
+                                            authorizationToken: getStoredAuthResponse?.data as string
+                                        }
+                                    }}/>
+                            </Box>
                     </TabPanel>
                     
                     {/* Activities */}
@@ -519,7 +690,9 @@ function AdminDashboardPage() {
                         bg={"white"}
                         borderRadius={"md"}
                         shadow={"md"}>
-                        <ActivityTable activities={localState?.activities}/>
+                            <Box  p={"5"} maxH="80vh" overflow="auto">
+                                <ActivityTable activities={localState?.activities}/>
+                            </Box>
                     </TabPanel>
                 </TabPanels>
             </Tabs>

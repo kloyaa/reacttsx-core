@@ -9,8 +9,8 @@ import {
 import { currency } from '../utils/converter.util'
 
 interface StatsCardProps {
-    title: any
-    stat: any
+    title: any;
+    stat: any;
 }
 
 function StatsCard(props: StatsCardProps) {
@@ -25,16 +25,18 @@ function StatsCard(props: StatsCardProps) {
         bg={"white"}>
             <StatLabel fontWeight={'normal'}  fontSize={'sm'} color={"gray.500"} isTruncated>{title}</StatLabel>
             <StatNumber fontSize={'2xl'} fontWeight={'black'}>{stat}</StatNumber>
+            {/* <StatNumber fontSize={'2xl'} fontWeight={'black'}>{swertresCount}</StatNumber> */}
     </Stat>
     )
 }
 
-export default function AdminDailyTotalCard({ total, count }: { total: number, count: number}) {
+export default function AdminDailyTotalCard({ total, stlCount, swertresCount }: { total: number, swertresCount: number, stlCount: number}) {
     return (
         <Box maxW="7xl" pt={"5"}>
             <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 5, lg: 8 }}>
                 <StatsCard title={'Daily Gross'} stat={currency.format(total)} />
-                <StatsCard title={'Numbers Formulated'} stat={count} />
+                <StatsCard title={'STL Count'} stat={stlCount} />
+                <StatsCard title={'3D Count'} stat={swertresCount} />
             </SimpleGrid>
         </Box>
     )

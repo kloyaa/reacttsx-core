@@ -18,3 +18,5 @@ export const API_GET_DAILY_RESULTS = `${API_BASE_URL}/api/bet/v1/daily-result`;
 export const API_GET_DAILY_TOTAL = `${API_BASE_URL}/api/bet/v1/daily-total`;
 export const API_DELETE_DAILY_RESULT = `${API_BASE_URL}/api/bet/v1/remove/`;
 
+export const API_GET_ALL_TRANSACTIONS = `${API_BASE_URL}/api/transaction/v1/all`;
+
