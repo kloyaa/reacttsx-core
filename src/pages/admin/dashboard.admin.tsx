@@ -382,6 +382,7 @@ function AdminDashboardPage() {
         onGetTodaysTransaction();
         onGetDailyResults();
         verifyToken();
+        document.title = "Dashboard | Swerte Saya"
     }, []);
     
     useEffect(() => {

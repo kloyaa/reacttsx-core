@@ -13,6 +13,7 @@ import {
     useColorModeValue,
     Stack,
     Tooltip,
+    Icon,
 } from '@chakra-ui/react'
 import { FaCog } from "react-icons/fa";
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons'
@@ -36,7 +37,7 @@ const NavLink = (props: Props) => {
         rounded={'md'}
         fontSize={"sm"}
         cursor={"pointer"}
-        color={"gray.300"}>
+        color={"whiteAlpha.500"}>
         <Tooltip hasArrow label="Coming soon!" aria-label='Coming soon!'>
             {children}
         </Tooltip>
@@ -56,8 +57,8 @@ export default function AdminNavbar() {
 
     return (
     <>
-        <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
-        <Flex h={12} alignItems={'center'} justifyContent={'space-between'}>
+        <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}  backgroundColor={"orange.500"}>
+        <Flex h={10} alignItems={'center'} justifyContent={'space-between'}>
             <IconButton
             size={'md'}
             icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
@@ -66,10 +67,10 @@ export default function AdminNavbar() {
             onClick={isOpen ? onClose : onOpen}
             />
             <HStack spacing={8} alignItems={'center'}>
-            <Box fontWeight={"black"}>Swerte Saya</Box>
+            <Box fontWeight={"black"} color={"white"}>Swerte Saya</Box>
             <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
                 {Links.map((link) => (
-                <NavLink key={link}>{link}</NavLink>
+                    <NavLink key={link}>{link}</NavLink>
                 ))}
             </HStack>
             </HStack>
@@ -81,11 +82,10 @@ export default function AdminNavbar() {
                     cursor={'pointer'}
                     variant={"unstyled"}
                     minW={0}>
-                    <FaCog />
+                        <Icon as={FaCog} color={"white"} />
                 </MenuButton>
                 <MenuList>
                 <MenuItem>Maintenance mode</MenuItem>
-                <MenuItem>Change Password</MenuItem>
                 <MenuDivider />
                 <MenuItem onClick={() => onSignOut()}>Sign out</MenuItem>
                 </MenuList>
