@@ -24,4 +24,5 @@ export interface IDailyResult {
     schedule: string;
     type: string;
     time: string;
+    wins: number;
 }
