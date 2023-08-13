@@ -18,6 +18,7 @@ import { FaPrint } from "react-icons/fa"
 import AdminDailyTotalCard from '../../components/daily-total-admin.component';
 import { ITransaction } from '../../interface/transaction.interface';
 import { currency } from '../../utils/converter.util';
+import { amountToWin } from '../../utils/bet.util';
 
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
@@ -219,6 +220,7 @@ function AdminDashboardPage() {
         }));
 
         console.log({ title: "@onGetDailyResults", schedule: `${year}-${month}-${day}` })
+        console.log(response)
     }
 
     const onGetDailyTotal = async () => {
@@ -488,27 +490,33 @@ function AdminDashboardPage() {
                                             <Thead >
                                                 <Tr>
                                                     <Th>Teller</Th>
-                                                    <Th>Number</Th>
                                                     <Th>Game</Th>
                                                     <Th>Draw Time</Th>
+                                                    <Th>Number</Th>
                                                     <Th>Type</Th>
-                                                    <Th>Amount</Th>
+                                                    <Th>Bet Amount</Th>
                                                     <Th>Transaction Time</Th>
+                                                    <Th>Amount to Win</Th>
                                                 </Tr>
                                             </Thead>
                                             <Tbody>
                                                 {localState.dailyTransactions.map((v) => {
                                                         return v.content.map((content, index) => {
                                                             const combinationType = content.rambled ? "R" : "T";
+                                                            const amountWin: string = currency.format(amountToWin(
+                                                                content.amount, 
+                                                                content.number, 
+                                                                combinationType === "T" ? false : true
+                                                            ));
                                                             return <Tr key={v._id + `${index}`}>
                                                                 <td>
                                                                     <Text textTransform={"capitalize"}>{v.profile.firstName}</Text>
                                                                 </td>
+                                                                <td>{content.type}</td>
+                                                                <td>{content.time}</td>
                                                                 <td>
                                                                     <Text fontWeight={"black"}>{content.number}</Text>
                                                                 </td>
-                                                                <td>{content.type}</td>
-                                                                <td>{content.time}</td>
                                                                 <td>
                                                                     {combinationType === "T" 
                                                                         ? <Badge colorScheme={"blackAlpha"} w={"90px"} textAlign={"center"}>TARGET</Badge> 
@@ -516,6 +524,9 @@ function AdminDashboardPage() {
                                                                 </td>
                                                                 <td >{currency.format(content.amount)}</td>
                                                                 <td>{dayjs(v.createdAt).format("h:mm A")}</td>
+                                                                <td >
+                                                                    <Text fontWeight={"black"}>{amountWin}</Text>
+                                                                </td>
                                                             </Tr>
                                                         })
                                                 })}
@@ -556,12 +567,29 @@ function AdminDashboardPage() {
                                                     <Popover>
                                                         <PopoverTrigger>
                                                         <Box 
+                                                            position={"relative"}
                                                             width={"140px"}  
                                                             p={"5"} 
                                                             bg={"gray.50"} 
                                                             color={"gray.900"} 
                                                             borderRadius={"md"}
                                                             cursor={"pointer"}>
+                                                            <Box    
+                                                                position={"absolute"}
+                                                                top={"-5"}
+                                                                right={"5"}
+                                                                backgroundColor={"red.500"}
+                                                                borderRadius={"full"}
+                                                                width={"10"}
+                                                                height={"10"}
+                                                                display="flex"              // Display the children as a flex container
+                                                                alignItems="center"        // Center vertically
+                                                                justifyContent="center"    // Center horizontally
+                                                                >
+                                                                <Text fontWeight={"black"} fontSize={"sm"} color={"white"}>
+                                                                    {v.wins}
+                                                                </Text>
+                                                            </Box>
                                                             <Text fontSize={"x-small"} color={"gray.500"}>{v.schedule.toString().substring(0,10)}</Text>
                                                             <Text fontWeight={"bold"} fontSize={"xs"}>{v.type} {v.time}</Text>
                                                             <Text fontWeight={"black"} fontSize={"3xl"}>{v.number}</Text>
@@ -628,7 +656,6 @@ function AdminDashboardPage() {
                             </Flex>
                         </Box>
                     </TabPanel>
-
                     <TabPanel 
                         bg={"white"}
                         borderRadius={"md"}
