@@ -244,17 +244,17 @@ function AdminDashboardPage() {
         console.log({ title: "@onGetDailyTotal", schedule: `${year}-${month}-${day}` })
     }
 
-    const onDeleteDailyResult = async (id: string) => {
+    const onDeleteDailyResult = async (time: string) => {
         try {
             setLocalState((prev) => ({
                 ...prev,
-                selectedId: id
+                selectedId: time
             }))
             
             await sendRequest<IApiResponse>(
                 HttpMethod.DELETE,
-                API_DELETE_DAILY_RESULT + `${id}`, // Replace with your actual authentication API endpoint
-                {},
+                API_DELETE_DAILY_RESULT, // Replace with your actual authentication API endpoint
+                { time },
                 { 'Authorization': `Bearer ${getStoredAuthResponse?.data}` });
             
             await onGetDailyResults();
@@ -605,8 +605,8 @@ function AdminDashboardPage() {
                                                                     colorScheme={"red"} 
                                                                     size={"sm"} 
                                                                     mt={"5"} 
-                                                                    isLoading={localState.selectedId === v._id}
-                                                                    onClick={() => onDeleteDailyResult(v._id)}>Delete</Button>
+                                                                    isLoading={localState.selectedId === v.time}
+                                                                    onClick={() => onDeleteDailyResult(v.time)}>Delete</Button>
                                                             </PopoverContent>
                                                         </Portal>
                                                     </Popover>
