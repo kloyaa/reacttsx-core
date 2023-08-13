@@ -28,3 +28,14 @@ export const amountToWin = (amount: number, combination: string, rambled: boolea
         }
     }
 };
+
+export const isCombinationHit = (number: string, time: string, rambled: boolean, dailyResults: any[]): boolean => {
+    const matchingResults = dailyResults.filter(result => {
+        const timeMatch = result.time === time;
+        const numberMatch = result.number.split('').every((char: any) => number.includes(char));
+
+        return timeMatch && (rambled ? numberMatch : result.number === number);
+    });
+
+    return matchingResults.length > 0;
+};

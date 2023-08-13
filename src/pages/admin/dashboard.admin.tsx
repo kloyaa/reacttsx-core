@@ -18,7 +18,7 @@ import { FaPrint } from "react-icons/fa"
 import AdminDailyTotalCard from '../../components/daily-total-admin.component';
 import { ITransaction } from '../../interface/transaction.interface';
 import { currency } from '../../utils/converter.util';
-import { amountToWin } from '../../utils/bet.util';
+import { amountToWin, isCombinationHit } from '../../utils/bet.util';
 
 dayjs.extend(relativeTime); // Extend Day.js with the relativeTime plugin
 dayjs.locale('en'); // Set the locale to English
@@ -486,7 +486,7 @@ function AdminDashboardPage() {
                                 <Box w={"70%"} p={"5"} maxH="500px" overflow="auto">
                                     {/* <BetOverviewTable bets={localState.dailyBets}/> */}
                                     <TableContainer>
-                                        <Table variant='striped' size={"sm"}>
+                                        <Table variant='simple' size={"sm"}>
                                             <Thead >
                                                 <Tr>
                                                     <Th>Teller</Th>
@@ -508,7 +508,11 @@ function AdminDashboardPage() {
                                                                 content.number, 
                                                                 combinationType === "T" ? false : true
                                                             ));
-                                                            return <Tr key={v._id + `${index}`}>
+                                                            return <Tr key={v._id + `${index}`} 
+                                                            backgroundColor={
+                                                                isCombinationHit(content.number, content.time, content.rambled, localState.dailyResults) ? "green" : "white"
+                                                            }
+                                                            color={isCombinationHit(content.number, content.time, content.rambled, localState.dailyResults) ? "white" : "gray.900"}>
                                                                 <td>
                                                                     <Text textTransform={"capitalize"}>{v.profile.firstName}</Text>
                                                                 </td>
